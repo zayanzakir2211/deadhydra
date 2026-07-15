@@ -163,6 +163,20 @@ export default function Settings({ open, onClose }) {
                 <option value="none">None</option>
               </select>
             </Field>
+            {settings.backgroundType === 'daily' && (
+              <Field label="Change photo every" isDark={isDark}>
+                <select
+                  value={settings.backgroundRefreshInterval}
+                  onChange={(e) => updateSetting('backgroundRefreshInterval', e.target.value)}
+                  className={inputCls(isDark)}
+                >
+                  <option value="newtab">New tab / reload</option>
+                  <option value="hourly">Hour</option>
+                  <option value="daily">Day</option>
+                  <option value="weekly">Week</option>
+                </select>
+              </Field>
+            )}
             {settings.backgroundType === 'custom' && (
               <Field label="Upload image" isDark={isDark}>
                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="text-xs text-stone" />

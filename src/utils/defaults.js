@@ -6,6 +6,7 @@ export const DEFAULT_SETTINGS = {
   manualCity: '',
   theme: 'system', // system | dark | light
   backgroundType: 'daily', // daily | custom | color | none
+  backgroundRefreshInterval: 'daily', // newtab | hourly | daily | weekly
   customBackground: '',
   backgroundEnabled: true,
   pomodoroWork: 25,

@@ -5,8 +5,27 @@ import { dailyPicsumUrl } from './utils/api'
 import DashboardGrid from './components/DashboardGrid'
 import SettingsPanel from './components/Settings'
 
-function todayKey() {
-  return new Date().toISOString().slice(0, 10)
+function bucketKey(interval) {
+  const now = new Date()
+  switch (interval) {
+    case 'newtab':
+      // A fresh key every time the app loads (new tab / reload).
+      return `session-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+    case 'hourly':
+      return `${now.toISOString().slice(0, 13)}` // YYYY-MM-DDTHH
+    case 'weekly': {
+      // Group by ISO week (Mon-Sun).
+      const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()))
+      const dayNum = d.getUTCDay() || 7
+      d.setUTCDate(d.getUTCDate() + 4 - dayNum)
+      const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
+      const weekNo = Math.ceil(((d - yearStart) / 86400000 + 1) / 7)
+      return `${d.getUTCFullYear()}-W${weekNo}`
+    }
+    case 'daily':
+    default:
+      return now.toISOString().slice(0, 10) // YYYY-MM-DD
+  }
 }
 
 function Background() {
@@ -14,12 +33,13 @@ function Background() {
   const [dailyCache, setDailyCache] = useLocalStorage('deadhydra:dailyBg', null)
 
   useEffect(() => {
-    const key = todayKey()
     if (settings.backgroundType !== 'daily') return
-    if (dailyCache && dailyCache.dateKey === key) return
+    const key = bucketKey(settings.backgroundRefreshInterval)
+    // "newtab" mode always gets a fresh key, so always refresh; otherwise reuse cache within the bucket.
+    if (settings.backgroundRefreshInterval !== 'newtab' && dailyCache && dailyCache.dateKey === key) return
     setDailyCache({ dateKey: key, url: dailyPicsumUrl(key) })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settings.backgroundType])
+  }, [settings.backgroundType, settings.backgroundRefreshInterval])
 
   if (!settings.backgroundEnabled || settings.backgroundType === 'none') {
     return <div className={`fixed inset-0 -z-10 ${isDark ? 'bg-void' : 'bg-card-light'}`} />
