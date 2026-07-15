@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Space Grotesk", "Inter", sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+
+  --color-void: #0b1210;
+  --color-swamp: #101c18;
+  --color-card: #142420;
+  --color-card-light: #f4f1ea;
+  --color-scale: #4c9a82;
+  --color-scale-bright: #6fc9ab;
+  --color-rust: #c4443a;
+  --color-bone: #e8e3d9;
+  --color-stone: #8b8175;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+  html.light {
+    color-scheme: light;
+  }
+  body {
+    font-family: var(--font-body);
+    @apply bg-void text-bone antialiased;
+  }
+  ::selection {
+    background: var(--color-scale);
+    color: var(--color-void);
+  }
+}
+
+@layer utilities {
+  .scale-texture {
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(76, 154, 130, 0.08) 1px, transparent 0);
+    background-size: 14px 14px;
+  }
+  .glass {
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+  }
+}
+
+@keyframes ember-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+.animate-ember {
+  animation: ember-pulse 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
