@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useSettings } from '../../context/SettingsContext'
-import { useGeolocation } from '../../hooks/useGeolocation'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
 import { fetchWeatherByCoords, geocodeCity, describeWeatherCode } from '../../utils/api'
 
 const CACHE_KEY = 'deadhydra:weatherCache'
 const CACHE_TTL_MS = 1000 * 60 * 30 // 30 min
+
+// Hardcoded fallback location (used unless a manual city is set in Settings).
+const FIXED_LOCATION = { lat: 23.54547, lon: 89.178315 }
 
 function toF(c) {
   return (c * 9) / 5 + 32
@@ -27,14 +29,14 @@ export default function Weather() {
   const [cache, setCache] = useLocalStorage(CACHE_KEY, null)
   const [error, setError] = useState(null)
   const useManualCity = Boolean(settings.manualCity)
-  const { coords } = useGeolocation({ enabled: !useManualCity })
+  const coords = FIXED_LOCATION
 
   useEffect(() => {
     let cancelled = false
 
     async function load() {
       const now = Date.now()
-      const cacheKeyLabel = useManualCity ? settings.manualCity : coords ? `${coords.lat.toFixed(2)},${coords.lon.toFixed(2)}` : null
+      const cacheKeyLabel = useManualCity ? settings.manualCity : `${coords.lat.toFixed(2)},${coords.lon.toFixed(2)}`
       if (
         cache &&
         cache.locationKey === cacheKeyLabel &&
@@ -42,7 +44,6 @@ export default function Weather() {
       ) {
         return
       }
-      if (!useManualCity && !coords) return
 
       try {
         let lat, lon, placeName
@@ -54,7 +55,7 @@ export default function Weather() {
         } else {
           lat = coords.lat
           lon = coords.lon
-          placeName = 'Your location'
+          placeName = 'Jhenaidah, BD'
         }
         const w = await fetchWeatherByCoords(lat, lon)
         if (!cancelled) {
