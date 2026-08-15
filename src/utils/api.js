@@ -68,3 +68,28 @@ export function dailyPicsumUrl(seedDateKey) {
   // Picsum supports a seed param so the same "day" gets the same photo.
   return `https://picsum.photos/seed/${encodeURIComponent(seedDateKey)}/1920/1080`
 }
+
+export async function fetchSearchSuggestions(query, signal) {
+  const q = query.trim()
+  if (q.length < 2) return []
+
+  const url = `https://duckduckgo.com/ac/?q=${encodeURIComponent(q)}&type=list`
+  const res = await fetch(url, { signal })
+  if (!res.ok) throw new Error('Suggestion request failed')
+
+  const data = await res.json()
+  const unique = new Set()
+  const suggestions = []
+
+  for (const item of data) {
+    const phrase = typeof item?.phrase === 'string' ? item.phrase.trim() : ''
+    if (!phrase) continue
+    const key = phrase.toLowerCase()
+    if (unique.has(key)) continue
+    unique.add(key)
+    suggestions.push(phrase)
+    if (suggestions.length >= 8) break
+  }
+
+  return suggestions
+}
