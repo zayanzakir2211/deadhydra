@@ -69,27 +69,14 @@ export function dailyPicsumUrl(seedDateKey) {
   return `https://picsum.photos/seed/${encodeURIComponent(seedDateKey)}/1920/1080`
 }
 
-export async function fetchSearchSuggestions(query, signal) {
+export async function fetchSearchSuggestions(query, engine, signal) {
   const q = query.trim()
   if (q.length < 2) return []
 
-  const url = `https://duckduckgo.com/ac/?q=${encodeURIComponent(q)}&type=list`
+  const url = `/api/suggest?q=${encodeURIComponent(q)}&engine=${encodeURIComponent(engine || 'duckduckgo')}`
   const res = await fetch(url, { signal })
   if (!res.ok) throw new Error('Suggestion request failed')
 
   const data = await res.json()
-  const unique = new Set()
-  const suggestions = []
-
-  for (const item of data) {
-    const phrase = typeof item?.phrase === 'string' ? item.phrase.trim() : ''
-    if (!phrase) continue
-    const key = phrase.toLowerCase()
-    if (unique.has(key)) continue
-    unique.add(key)
-    suggestions.push(phrase)
-    if (suggestions.length >= 8) break
-  }
-
-  return suggestions
+  return Array.isArray(data?.suggestions) ? data.suggestions : []
 }

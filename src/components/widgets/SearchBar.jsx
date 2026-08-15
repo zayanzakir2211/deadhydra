@@ -10,6 +10,7 @@ export default function SearchBar() {
   const [activeIndex, setActiveIndex] = useState(-1)
   const [showSuggestions, setShowSuggestions] = useState(false)
   const containerRef = useRef(null)
+  const activeEngine = settings.searchEngine || 'google'
 
   useEffect(() => {
     const trimmed = query.trim()
@@ -22,7 +23,7 @@ export default function SearchBar() {
     const controller = new AbortController()
     const timeout = setTimeout(async () => {
       try {
-        const results = await fetchSearchSuggestions(trimmed, controller.signal)
+        const results = await fetchSearchSuggestions(trimmed, activeEngine, controller.signal)
         setSuggestions(results)
         setActiveIndex(-1)
       } catch (error) {
@@ -36,7 +37,7 @@ export default function SearchBar() {
       controller.abort()
       clearTimeout(timeout)
     }
-  }, [query])
+  }, [query, activeEngine])
 
   useEffect(() => {
     const handleClickOutside = (event) => {
