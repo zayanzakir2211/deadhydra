@@ -53,12 +53,11 @@ export async function geocodeCity(city) {
 
 export async function fetchQuote() {
   try {
-    const res = await fetch('https://zenquotes.io/api/random')
+    const res = await fetch('/api/quote')
     if (!res.ok) throw new Error('Quote request failed')
-    const data = await res.json()
-    const q = data[0]
-    if (!q || !q.q) throw new Error('Bad quote payload')
-    return { content: q.q, author: q.a || 'Unknown' }
+    const quote = await res.json()
+    if (!quote || !quote.content) throw new Error('Bad quote payload')
+    return quote
   } catch {
     return null
   }

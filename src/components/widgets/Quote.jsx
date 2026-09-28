@@ -19,12 +19,17 @@ export default function Quote() {
 
   const loadQuote = async (force = false) => {
     const key = todayKey()
-    if (!force && cache && cache.dateKey === key) return
+    if (!force && cache && cache.dateKey === key && cache.source === 'remote') return
     setLoading(true)
-    const remote = await fetchQuote()
-    const quote = remote || randomFallback()
-    setCache({ ...quote, dateKey: key })
-    setLoading(false)
+    try {
+      const remote = await fetchQuote()
+      const quote = remote
+        ? { ...remote, dateKey: key, source: 'remote' }
+        : { ...randomFallback(), dateKey: key, source: 'fallback' }
+      setCache(quote)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
